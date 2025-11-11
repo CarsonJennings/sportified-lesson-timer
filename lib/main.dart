@@ -17,13 +17,54 @@ class MyApp extends StatelessWidget {
           'Sportified Lesson Timer',
           style: TextStyle(
             color: Colors.white
+            ),
           ),
         ),
+        body: Container(
+          color: Colors.white,
+          child: ListView(
+            children: const <Widget>[
+              Drill(
+                title: "Warmup",
+                drillIcon: Icons.directions_run,
+                description: "Light jogging and stretching to prepare your body.",
+                drillDuration: Duration(minutes: 5)
+              ),
+              Drill(
+                title: "Shooting practice",
+                drillIcon: Icons.sports_soccer,
+                description: "Focus on accuracy and form during your shots.",
+                drillDuration: Duration(minutes: 10)
+              ),
+              Drill(
+                title: "Cooldown",
+                drillIcon: Icons.sports_gymnastics,
+                description: "Gentle stretching and deep breathing to recover and relax.",
+                drillDuration: Duration(minutes: 5)
+              ),
+            ],
+          ),
         ),
-        body: Center(
-          child: const Text("Hello world"),
-        )
       ),
+    );
+  }
+}
+
+class Drill extends StatelessWidget {
+  const Drill({super.key, required this.title, required this.drillIcon, required this.description, required this.drillDuration});
+
+  final String title;
+  final IconData drillIcon;
+  final String description;
+  final Duration drillDuration;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(drillIcon), 
+      title: Text(title),
+      subtitle: 
+        Text("$description\n${drillDuration.inMinutes.toString()} minutes"),
     );
   }
 }
