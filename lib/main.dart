@@ -60,11 +60,46 @@ class Drill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(drillIcon), 
-      title: Text(title),
-      subtitle: 
-        Text("$description\n${drillDuration.inMinutes.toString()} minutes"),
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.push(context,
+          MaterialPageRoute(
+            builder: (_) => TimerScreen(),
+          ),
+        );
+      },
+      
+      child: ListTile(
+        leading: Icon(drillIcon), 
+        title: Text(title),
+        subtitle: 
+          Text("$description\n${drillDuration.inMinutes.toString()} minutes"),
+      ),
+    );
+  }
+}
+
+
+class TimerScreen extends StatelessWidget {
+  const TimerScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        iconTheme: IconThemeData(color: Colors.white),
+        title: const Text(
+          'Sportified Lesson Timer',
+          style: TextStyle(
+            color: Colors.white
+            ),
+          ),
+        ),
+      body: 
+        Center(
+          child: Text('timer to go here')
+        ),
     );
   }
 }
