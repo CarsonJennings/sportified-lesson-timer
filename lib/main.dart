@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 
 void main() {
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
                 title: "Warmup",
                 drillIcon: Icons.directions_run,
                 description: "Light jogging and stretching to prepare your body.",
-                drillDuration: Duration(minutes: 5)
+                drillDuration: Duration(seconds: 10)
               ),
               Drill(
                 title: "Shooting practice",
@@ -64,7 +65,7 @@ class Drill extends StatelessWidget {
       onPressed: () {
         Navigator.push(context,
           MaterialPageRoute(
-            builder: (_) => TimerScreen(),
+            builder: (_) => TimerScreen(title: title, drillDuration: drillDuration),
           ),
         );
       },
@@ -81,7 +82,10 @@ class Drill extends StatelessWidget {
 
 
 class TimerScreen extends StatelessWidget {
-  const TimerScreen({super.key});
+  const TimerScreen({super.key, required this.title, required this.drillDuration});
+
+  final String title;
+  final Duration drillDuration;
 
   @override
   Widget build(BuildContext context) {
@@ -98,8 +102,113 @@ class TimerScreen extends StatelessWidget {
         ),
       body: 
         Center(
-          child: Text('timer to go here')
+          child: Column(
+            children: [
+              Text(title),
+              Text('Total Duration: ${drillDuration.inMinutes.toString()} minutes'),
+              CountdownTimer(initialTime: drillDuration,),
+            ],
+          )
         ),
     );
   }
 }
+
+class CountdownTimer extends StatefulWidget {
+  const CountdownTimer({super.key, required this.initialTime});
+  final Duration initialTime;
+
+  @override
+  State<CountdownTimer> createState() => _CountdownTimerState();
+}
+
+class _CountdownTimerState extends State<CountdownTimer> {
+  Timer? timer;
+  late int timeLeft;
+
+  @override
+  void initState() {
+    timeLeft = widget.initialTime.inSeconds;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isRunning = timer?.isActive ?? false;
+
+    return Column(
+      
+      children: [
+        Text(formatTime(Duration(seconds: timeLeft))),
+        timeLeft <= 0 ? Text('Done!') 
+        :
+        Tooltip(
+          message: isRunning ? 'Pause timer' : 'Start timer',
+          child: (ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateColor.resolveWith(
+              (Set<WidgetState> states) {
+                if (states.contains(WidgetState.pressed)) {
+                  return Colors.blueAccent;
+                }
+                return Colors.blue;
+              }
+            ),
+          ),
+          onPressed: () {
+            if (isRunning) {
+              pauseTimer();
+            } else {
+              startTimer();
+            }
+          },
+          child: Icon(isRunning ? Icons.pause : Icons.play_arrow),
+                )),
+        ),
+      Tooltip(
+        message: 'Reset timer',
+        child: ElevatedButton(
+          onPressed: (resetTimer),
+          child: Icon(Icons.restart_alt)),
+      )
+      ]
+    );
+  }
+
+void startTimer() {
+  timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    setState(() {
+      timeLeft--;
+      if (timeLeft <= 0) timer.cancel();
+    });
+  });
+
+  setState(() {}); // Call an additonal setState so first time start is clicked UI updates immediately and not after 1 second
+}
+
+void pauseTimer() {
+  setState(() {
+    timer?.cancel();
+  });
+}
+
+void resetTimer() {
+  setState(() {
+    timer?.cancel();
+    timeLeft = widget.initialTime.inSeconds;
+  });
+}
+
+String formatTime(Duration time) {
+  return time.toString().split('.')[0];
+}
+
+@override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+}
+
+
