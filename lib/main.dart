@@ -5,8 +5,21 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _appTheme = ThemeMode.light;
+
+  void toggleTheme () {
+    setState(() {
+      _appTheme = _appTheme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,19 +27,27 @@ class MyApp extends StatelessWidget {
       title: 'Sportified Lesson Timer',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
         textTheme: const TextTheme(
           titleLarge: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
           bodyMedium: TextStyle(fontSize: 16, color: Colors.black87),
         ),
       ),
-      home: const DrillListScreen(),
+      darkTheme: ThemeData( // dark mode
+        brightness: Brightness.dark,
+        textTheme: const TextTheme(
+          titleLarge: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          bodyMedium: TextStyle(fontSize: 16, color: Colors.white),
+        ),
+      ),
+      themeMode: _appTheme,
+      home: DrillListScreen(themeToggle: toggleTheme),
     );
   }
 }
 
 class DrillListScreen extends StatelessWidget {
-  const DrillListScreen({super.key});
+  const DrillListScreen({super.key, required this.themeToggle});
+  final VoidCallback themeToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -38,22 +59,28 @@ class DrillListScreen extends StatelessWidget {
         ),
         backgroundColor: Colors.blue,
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: themeToggle,
+            icon: Icon(Theme.of(context).brightness == Brightness.dark ? Icons.light_mode : Icons.dark_mode, color: Colors.white),
+          ),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth > 600;
           final padding = isWide ? 40.0 : 16.0;
           return Container(
-            color: Colors.white,
             padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16),
             child: ListView(
-              children: const [
+              children: [
                 Drill(
                   title: "Warmup",
                   drillIcon: Icons.directions_run,
                   description:
                       "Light jogging and stretching to prepare your body.",
                   drillDuration: Duration(minutes: 5),
+                  themeToggle: themeToggle,
                 ),
                 Drill(
                   title: "Shooting Practice",
@@ -61,6 +88,7 @@ class DrillListScreen extends StatelessWidget {
                   description:
                       "Focus on accuracy and form during your shots.",
                   drillDuration: Duration(minutes: 10),
+                  themeToggle: themeToggle,
                 ),
                 Drill(
                   title: "Cooldown",
@@ -68,6 +96,7 @@ class DrillListScreen extends StatelessWidget {
                   description:
                       "Gentle stretching and deep breathing to recover and relax.",
                   drillDuration: Duration(minutes: 5),
+                  themeToggle: themeToggle,
                 ),
               ],
             ),
@@ -85,12 +114,14 @@ class Drill extends StatelessWidget {
     required this.drillIcon,
     required this.description,
     required this.drillDuration,
+    required this.themeToggle,
   });
 
   final String title;
   final IconData drillIcon;
   final String description;
   final Duration drillDuration;
+  final VoidCallback themeToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +137,7 @@ class Drill extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (_) =>
-                  TimerScreen(title: title, drillDuration: drillDuration),
+                  TimerScreen(title: title, drillDuration: drillDuration, themeToggle: themeToggle,),
             ),
           );
         },
@@ -147,10 +178,12 @@ class TimerScreen extends StatelessWidget {
     super.key,
     required this.title,
     required this.drillDuration,
+    required this.themeToggle,
   });
 
   final String title;
   final Duration drillDuration;
+  final VoidCallback themeToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -165,6 +198,12 @@ class TimerScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: themeToggle,
+            icon: Icon(Theme.of(context).brightness == Brightness.dark ? Icons.light_mode : Icons.dark_mode, color: Colors.white),
+          ),
+        ],
       ),
       body: Center(
         child: Container(
